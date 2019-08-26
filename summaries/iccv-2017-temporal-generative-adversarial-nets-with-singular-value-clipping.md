@@ -2,8 +2,9 @@
 
 - [TITLE: ICCV 2017 Temporal Generative Adversarial Nets with Singular Value Clipping](#title-iccv-2017-temporal-generative-adversarial-nets-with-singular-value-clipping)
   - [SUMMARY](#summary)
-    - [ARCHITECTURE SUMMARY](#architecture-summary)
     - [APPLICATIONS SUMMARY](#applications-summary)
+    - [ARCHITECTURE SUMMARY](#architecture-summary)
+    - [AUTHORS](#authors)
     - [COMPARED TO](#compared-to)
     - [CONTRIBUTIONS](#contributions)
     - [DATASETS](#datasets)
@@ -20,6 +21,12 @@
   - [QUANTITATIVE EVALUATION](#quantitative-evaluation)
 
 ## SUMMARY
+
+### APPLICATIONS SUMMARY
+
+- Frame interpolation by simply interpolating the trajectory in the latent space $[z^1_1, z^2_1, ... , z^T_1]$ and running the image generator $G_1$ on the new points. The authors used a simple bilinear filter for interpolating the $z^t_1$. The resulting images have more realistic motion dynamics than what a simple image interpolation method on $x^t$ would produce.
+
+- Condition TGAN can use label information (category of video) to produce better quality videos. The labels are converted to one hot vectors and given to $G_0$, $G_1$ and the discriminator. The one hot vector is broadcast to a voxel of the same resolution as the video and concatenated with the video and this is given to the discriminator.
 
 ### ARCHITECTURE SUMMARY
 
@@ -84,11 +91,13 @@ debug 6: (16, 1, 1, 1)
 (batch_size, 1 channels, 1 height, 1 width) scalar output of discriminator.
 ```
 
-### APPLICATIONS SUMMARY
+### AUTHORS
 
-- Frame interpolation by simply interpolating the trajectory in the latent space $[z^1_1, z^2_1, ... , z^T_1]$ and running the image generator $G_1$ on the new points. The authors used a simple bilinear filter for interpolating the $z^t_1$. The resulting images have more realistic motion dynamics than what a simple image interpolation method on $x^t$ would produce.
+Preferred Networks inc., Japan
 
-- Condition TGAN can use label information (category of video) to produce better quality videos. The labels are converted to one hot vectors and given to $G_0$, $G_1$ and the discriminator. The one hot vector is broadcast to a voxel of the same resolution as the video and concatenated with the video and this is given to the discriminator.
+- Masaki Saito [msaito@preferred.jp](mailto:msaito@preferred.jp)
+- Eiichi Matsumoto [matsumoto@preferred.jp](mailto:matsumoto@preferred.jp)
+- Shunta Saito [shunta@preferred.jp](mailto:shunta@preferred.jp)
 
 ### COMPARED TO
 

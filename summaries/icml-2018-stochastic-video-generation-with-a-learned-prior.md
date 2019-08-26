@@ -1,6 +1,6 @@
-# TITLE: ICCV 2017 Stochastic Video Generation with a Learned Prior
+# TITLE: ICML 2018 Stochastic Video Generation with a Learned Prior
 
-- [TITLE: ICCV 2017 Stochastic Video Generation with a Learned Prior](#title-iccv-2017-stochastic-video-generation-with-a-learned-prior)
+- [TITLE: ICML 2018 Stochastic Video Generation with a Learned Prior](#title-icml-2018-stochastic-video-generation-with-a-learned-prior)
   - [SUMMARY](#summary)
     - [ARCHITECTURE SUMMARY](#architecture-summary)
     - [CONTRIBUTIONS](#contributions)

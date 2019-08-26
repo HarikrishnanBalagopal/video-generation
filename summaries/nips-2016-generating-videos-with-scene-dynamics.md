@@ -2,8 +2,9 @@
 
 - [TITLE: NIPS 2016 Generating Videos with Scene Dynamics](#title-nips-2016-generating-videos-with-scene-dynamics)
   - [SUMMARY](#summary)
-    - [ARCHITECTURE SUMMARY](#architecture-summary)
     - [APPLICATIONS SUMMARY](#applications-summary)
+    - [ARCHITECTURE SUMMARY](#architecture-summary)
+    - [AUTHORS](#authors)
     - [COMPARED TO](#compared-to)
     - [CONTRIBUTIONS](#contributions)
     - [DATASETS](#datasets)
@@ -18,6 +19,12 @@
 
 ## SUMMARY
 
+### APPLICATIONS SUMMARY
+
+- Future Generation. Given a single input frame predict the future frames. The architecture is augmented with a 5 layer convolutional network at the front of the generator. The input image is passed through this network and produces the (100 dim) latent vector for the generator. During training a L1 loss is applied between the first generated frame and the input image.
+
+- Video Representation Learning. The discriminator weights that are learned by the GAN are also useful for action recognition/classification. The final layer is replaced with a linear layer to K outputs. Softmax activation is applied and the model is fine-tuned on a small set of labeled data. The learned weights were found to significantly outperform both randomly initialized weights and also to hand-crafted STIP features.
+
 ### ARCHITECTURE SUMMARY
 
 ![alt text](images/nips-2016-generating-videos-with-scene-dynamics/architecture.png "Architecture")
@@ -28,11 +35,14 @@ Background is assumed static. Background generated using Conv2dtranspose layers.
 
 $$G_2(z) = m(z) \odot f(z) + (1 - m(z)) \odot b(z)$$
 
-### APPLICATIONS SUMMARY
+In order to encourage the network to use the background stream, a sparsity prior is
+added to the mask during learning.
 
-- Future Generation. Given a single input frame predict the future frames. The architecture is augmented with a 5 layer convolutional network at the front of the generator. The input image is passed through this network and produces the (100 dim) latent vector for the generator. During training a L1 loss is applied between the first generated frame and the input image.
+### AUTHORS
 
-- Video Representation Learning. The discriminator weights that are learned by the GAN are also useful for action recognition/classification. The final layer is replaced with a linear layer to K outputs. Softmax activation is applied and the model is fine-tuned on a small set of labeled data. The learned weights were found to significantly outperform both randomly initialized weights and also to hand-crafted STIP features.
+- Carl Vondrick (MIT) [vondrick@mit.edu](mailto:vondrick@mit.edu)
+- Hamed Pirsiavash (UMBC) [hpirsiav@umbc.edu](mailto:hpirsiav@umbc.edu)
+- Antonio Torralba (MIT) [torralba@mit.edu](mailto:torralba@mit.edu)
 
 ### COMPARED TO
 
@@ -49,7 +59,7 @@ The encoder is similar to the discriminator network (except producing 100 dimens
 
 ### DATASETS
 
-- Unlabeled Video Dataset: The authors took 2 million videos from Flickr using tags. The dataset is over 5000 hours.
+- Unlabeled Video Dataset: The authors took 2 million videos from Flickr using tags. The dataset is over 5000 hours. This contains parts of the Yahoo Flickr Creative Commons Dataset.
 
 - Filtered Unlabeled Videos: The above dataset filtered by scene category using Places2 pre-trained model [NIPS 2014 Learning deep features for scene recognition using
 places database](https://papers.nips.cc/paper/5349-learning-deep-features-for-scene-recognition-using-places-database.pdf). 4 scene categories: golf course, hospital rooms (babies), beaches, and train station. Stabilized the camera motion for both datasets. Extracted SIFT keypoints, used RANSAC to estimate a homography (rotation, translation, scale) between adjacent frames, and warped frames to minimize background motion. When the homography moved out of the frame, filled in the missing values using the previous frames. If the homography has too large of a re-projection error, ignored that segment of the video for training, which only happened 3% of the time. Videos are 32 frames of spatial resolution 64 x 64.
