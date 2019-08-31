@@ -21,9 +21,11 @@
 
 ### APPLICATIONS SUMMARY
 
-- Future Generation. Given a single input frame predict the future frames. The architecture is augmented with a 5 layer convolutional network at the front of the generator. The input image is passed through this network and produces the (100 dim) latent vector for the generator. During training a L1 loss is applied between the first generated frame and the input image.
+- Unconditional video generation
 
-- Video Representation Learning. The discriminator weights that are learned by the GAN are also useful for action recognition/classification. The final layer is replaced with a linear layer to K outputs. Softmax activation is applied and the model is fine-tuned on a small set of labeled data. The learned weights were found to significantly outperform both randomly initialized weights and also to hand-crafted STIP features.
+- Future prediction. Given a single input frame predict the future frames. The architecture is augmented with a 5 layer convolutional network at the front of the generator. The input image is passed through this network and produces the (100 dim) latent vector for the generator. During training a L1 loss is applied between the first generated frame and the input image.
+
+- Video representation learning. The discriminator weights that are learned by the GAN are also useful for action recognition/classification. The final layer is replaced with a linear layer to K outputs. Softmax activation is applied and the model is fine-tuned on a small set of labeled data. The learned weights were found to significantly outperform both randomly initialized weights and also to hand-crafted STIP features.
 
 ### ARCHITECTURE SUMMARY
 
