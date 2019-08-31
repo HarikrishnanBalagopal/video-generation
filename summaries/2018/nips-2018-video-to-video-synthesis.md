@@ -19,6 +19,10 @@
 
 ### APPLICATIONS SUMMARY
 
+- Supervised video to video translation
+
+- Future prediction
+
 ### ARCHITECTURE SUMMARY
 
 $$F(\tilde{x}^{t−1}_{t−L}, s^t_{t−L}) = (1 − \tilde{m}_t) \odot \tilde{w}_{t−1}(\tilde{x}_{t−1}) + \tilde{m}_t \odot \tilde{h}_t$$
@@ -80,8 +84,7 @@ We compare our approach to two baselines trained on the same data:
 
 - pix2pixHD is the state-of-the-art image-to-image translation approach. When applying the approach to the video-to-video synthesis task, we process input videos frame-by-frame.
 
-- COVST is built on the coherent video style transfer by replacing the stylization network with
-pix2pixHD. The key idea in COVST is to warp high-level deep features using optical flow for achieving temporally coherent outputs. No additional adversarial training is applied. We feed in ground truth optical flow to COVST, which is impractical for real applications. In contrast, our model estimates optical flow from source videos.
+- COVST is built on the coherent video style transfer by replacing the stylization network with pix2pixHD. The key idea in COVST is to warp high-level deep features using optical flow for achieving temporally coherent outputs. No additional adversarial training is applied. We feed in ground truth optical flow to COVST, which is impractical for real applications. In contrast, our model estimates optical flow from source videos.
 
 ### CONTRIBUTIONS
 
