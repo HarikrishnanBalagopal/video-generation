@@ -19,6 +19,8 @@
 
 ### APPLICATIONS SUMMARY
 
+- Unconditional video generation
+
 ### ARCHITECTURE SUMMARY
 
 ![architecture-1.png](images/2018-tganv2-efficient-training-of-large-models-for-video-generation-with-multiple-subsampling-layers/architecture-1.png "Architecture overview")
@@ -82,8 +84,7 @@ Training with multiple subsampling layers:
 
 There exists a trade-off between the efficient computation with a subsampling layer and the quality of a generated sample. When the dimensionality of a sample comes from S is small, we can efficiently train the network, but the quality tends to decrease. Thus, it requires careful hyper-parameter tuning to balance the trade-off when using a single subsampling layer. However, by introducing a generator that yields several samples rendered at multiple levels (e.g., multiple resolutions or multiple frame rates), we can efficiently train the network without significantly sacrificing the quality.
 
-Almost all generators including DCGAN [37] and SA-GAN [54] have a network structure that first yields a spatially small feature map with many channels and gradually transforms it into a larger one with fewer channels. In this case, the initial
-block in the generator has a large number of parameters, but its computational cost is relatively low. On the other hand, although the number of parameters in the latter block is quite smaller, it takes a lot of time for the computation. Therefore, when using the subsampling layer, reducing the abstract map in the initial block is not advantageous from the viewpoint of computational cost, while it is desirable to reduce the abstract maps in the latter blocks aggressively.
+Almost all generators including DCGAN [37] and SA-GAN [54] have a network structure that first yields a spatially small feature map with many channels and gradually transforms it into a larger one with fewer channels. In this case, the initial block in the generator has a large number of parameters, but its computational cost is relatively low. On the other hand, although the number of parameters in the latter block is quite smaller, it takes a lot of time for the computation. Therefore, when using the subsampling layer, reducing the abstract map in the initial block is not advantageous from the viewpoint of computational cost, while it is desirable to reduce the abstract maps in the latter blocks aggressively.
 
 In our method, we introduce the generator consisting of L abstract blocks, L rendering blocks, and L - 1 subsampling layers. We respectively denote them as $g^A_l$, $g^R_l$, and S^G_l. In the inference, x can be evaluated simply by sequentially applying abstract blocks and rendering with a single g^R_L
 
@@ -115,12 +116,10 @@ Suppose a generator yielding a video with T frames and W x H pixels. Unlike othe
 
 Figure 2. Network configuration of our model. “CLSTM(C)” represents the convolutional LSTM with C channels and 3 x 3 kernel. “Up(C)” means the upsampling block that returns a feature map with C channels and twice the resolution of the input.
 
-Given d-dimensional noise vector z randomly drawn from the uniform distribution within a range of [-1, 1], the generator converts it into a feature map of (W/64) x (H/64) pixels with a fully-connected layer. A recurrent block consisting of a Convolutional LSTM [42] receives this feature map as an input, and then returns another feature map with the same shape. This map from z is used to initialize the state of the CLSTM. For $t \geq 1$ the CLSTM always gets a map from a zero vector as input. After that, each feature map is transformed into another feature
-map with W x H pixels by six upsampling blocks, and a rendering block renders it into the frame.
+Given d-dimensional noise vector z randomly drawn from the uniform distribution within a range of [-1, 1], the generator converts it into a feature map of (W/64) x (H/64) pixels with a fully-connected layer. A recurrent block consisting of a Convolutional LSTM [42] receives this feature map as an input, and then returns another feature map with the same shape. This map from z is used to initialize the state of the CLSTM. For $t \geq 1$ the CLSTM always gets a map from a zero vector as input. After that, each feature map is transformed into another feature map with W x H pixels by six upsampling blocks, and a rendering block renders it into the frame.
 
 Our discriminator consists of several sub-discriminators. In the experiments, we
-use four 3D ResNet models, where each model has several spatio-temporal three-dimensional residual blocks [16, 17] and one fully-connected layer.
-(The network configuration of 3D ResNet itself is almost the same as the discriminator used in the "Spectral Normalization for Generative Adversarial Networks" paper except the kernel of all convolutional layers is replaced with (3 x 3) to (3 x 3 x 3)).
+use four 3D ResNet models, where each model has several spatio-temporal three-dimensional residual blocks [16, 17] and one fully-connected layer. (The network configuration of 3D ResNet itself is almost the same as the discriminator used in the "Spectral Normalization for Generative Adversarial Networks" paper except the kernel of all convolutional layers is replaced with (3 x 3) to (3 x 3 x 3)).
 
 Suppose abstract map h has a shape of $(N_h \times C_h \times T_h \times H_h \times W_h$), where each variable denotes batch size, channels, number of frames, height, and width. The subsampling layer reduces the shape of h to $(N_h/s_n \times C_h \times T_h/s_t \times H_h \times W_h)$.
 
@@ -128,6 +127,8 @@ The subsampling layers can be represented by `hd = h[::sn, :, bt::st]` in numpy 
 We used sn = 2 and st = 2 in all the experiments; that is, the dimensionality of the four rendered videos are almost equivalent since the upsampling block doubles width and height while the number of frames and the batch size are halved. This strategy to make the size of rendered tensor constant also has the advantage that the total amount of consumed memory increases only linearly, even if the resolution of the generated video is doubled.
 
 ![architecture-3.png](images/2018-tganv2-efficient-training-of-large-models-for-video-generation-with-multiple-subsampling-layers/architecture-3.png "Architecture overview")
+
+Figure 7. Details of the blocks used in the main paper. “Conv(C, k)” denotes a 2D convolutional layer with C channels and (k x k) kernel. “Conv3D(C, k)” denotes a 3D convolutional layer with C channels and (k x k x k) kernel. “UnPool” denotes a 2D unpooling layer with (2 x 2) kernel and stride 2. “AvgPool2D” denotes an average pooling layer along the spatial dimensions with (2 x 2)kernel and stride 2. Note that it does not perform pooling operation along the temporal dimension. “DownSample” means the down-sampling operator. If the size of each dimension of the input 3D feature maps is larger than one, this operator performs the average pooling along its axis (if the size is odd when performing the average pooling, the padding of the target axis is set to one). Otherwise, average pooling is not performed for that axis.(.) in “Up(C)” means that the blocks in the bracket are not inserted if the number of input channels is equivalent to that of output channels.
 
 ### AUTHORS
 
@@ -174,7 +175,9 @@ Regarding the classifier used for computing IS and FID, we used a pre-trained mo
 
 ![qualitative-faces-1.png](images/2018-tganv2-efficient-training-of-large-models-for-video-generation-with-multiple-subsampling-layers/qualitative-faces-1.png "Qualitative results on faces dataset.")
 
-Figure 3. Example of videos generated by TGANv2. Our model successfully generated facial videos with high resolution (256 x 256) without causing a large mode collapse.
+Figure 3. Example of videos generated by TGANv2. Due to the size of the paper, each frame is resized to 128 x 128 pixels.
+
+Our model successfully generated facial videos with high resolution (256 x 256) without causing a large mode collapse.
 
 One of the main reasons why it could produce such various videos even if the dataset has high resolution videos is that our method allows large batch size in the beginning part of the generator. Initial batch size is 64, and it gradually decreases to 32, 16, and 8 as the level goes deeper.
 
@@ -185,6 +188,21 @@ Even if the resolution was only 64 x 64 pixels, the batch sizes of videos used i
 Figure 4. Example of videos generated at different levels. The leftmost image represents the frame of the video generated by the initial rendering block, and the rightmost one denotes the final generated image.
 
 To check whether each rendering block generates the same content under the same z, we visualized the result of each rendering block in Figure 4. Interestingly, every rendering block in our method correctly generated the same content even though it does not perform a color-consistency regularization introduced in StackGAN++ [55].
+
+Experiments of memory capacity:
+Although our model succeeded in generating more de-tailed shapes such as person’s shadow than those in TGANand Progressive VGAN, the generated video itself still hasroom for improvement. Based on the background where thisproblem was not clearly explained in the existing studies, inthis section we discuss the hypothesis that the main reason isdue to thememory capacity. Unlike the FaceForensics [39]containing many similar parts, the UCF101 dataset has manydiverse videos that do not include overlapping clips. Thus,measuring the inception score when reducing the number ofvideos per category, we can roughly estimate the memorycapacity in the model.
+
+![qualitative-num-samples.png](images/2018-tganv2-efficient-training-of-large-models-for-video-generation-with-multiple-subsampling-layers/qualitative-num-samples.png "Results after training with different number of samples.")
+
+Figure 5. Changes of generated samples when changing the number of samples used for training.
+
+![qualitative-num-samples-graph.png](images/2018-tganv2-efficient-training-of-large-models-for-video-generation-with-multiple-subsampling-layers/qualitative-num-samples-graph.png "Graph of IS after training with different number of samples.")
+
+Figure 6. Transition of inception score when the number of samplesper category is limited. As the number of categories in the dataset is 101, the total number of samples used for training is 101 x N.
+
+The results are shown in Figures 5 and 6. When the number of samples per category is small, the quality of the generated video is clearly higher than that trained with the original dataset. It means that the model has potential powerof expression to generate natural videos. The score gradually decreased as the number of samples gradually increased, and it almost converged to a constant when the number ofsamples exceeded 1,000. This implies that the problem ofthe current model is primarily due to memory capacity.
+
+The generator for videos clearly needs more memory capacity than that for still images. When linearly moving $z$ of the GAN for still images, a created image is one like a morphing connecting two images smoothly. We consider that our model needs more memory capacity in order to supportmany essential transformations that cannot be created bysuch morphing. Considering that the current parameter size in the generator is only 312 MB while the uncompressed UCF-101 dataset used for training is about 200 GB, we predict it needs to drastically increase the number of parameters to generate high fidelity natural videos.
 
 ### QUANTITATIVE EVALUATION SUMMARY
 
@@ -223,6 +241,16 @@ It should be noted that this score cannot be achieved by simply making the outpu
 ### RELATED WORK
 
 - [Generative Adversarial Networks (GANs)](https://papers.nips.cc/paper/5423-generative-adversarial-nets)
+
+Image generation: Many applications of the GenerativeAdversarial Network [13] mainly focus on image generation problem; this is primarily because that DCGAN [37] demonstrated that the GAN is quite effective in image generation. After that, the DCGAN was extended to a network called SA-GAN [54] that includes spectral normalization [33] and self-attention blocks [51].  BigGAN [5] succeeded in generating high fidelity images by introducing several tricks such as orthogonal regularization that stabilizes the training with large batch size. In image-to-image translation problem that transfers an input image from another domain, there exists many studies for transforming high resolution images[20,50,58,28,19].
+
+Multi-scale GANs: Our approach is related to methods inwhich a generator produces multi-scale images. LAPGAN[8] first generates a coarse image and updates it by using a difference of an initial image. StackGAN [56,55] directly generates multi-scale images, and the corresponding discriminator returns a score from each image.  ProgressiveGAN[23] generates high-resolution images by growing both the generator and the discriminator
+
+Video prediction: Video prediction, which estimates subsequent images from a given few frames, is one of the major problems  in  computer  vision.   Although  there  is  no  unified  view  on  how  to  model  the  domain  of  video,  many studies dealing with video prediction problem directly predict the next frame with recurrent networks such as LSTM[38,34,44,21,11,30,10,3,6,9,25].
+
+Video-to-video translation: Recently, several studies havesucceeded in converting high-resolution videos into other ones in a different domain. RecycleGAN [4] extends a concept of CycleGAN [58], and solves a video retargeting problem with two video datasets for which correspondences are not given. Vid2Vid [49] learns a model that maps a source domain into an output one from a pair of videos and generates high resolution videos.  Contrary to these models that can be trained well with a small batch size, the generative model for videos generally requires a large batch size.
+
+Video generation: There are two major approaches in the field of video generation using GANs.  One is a study for generating plausible videos by limiting a video dataset to aspecific area such as human pose and face [7,57,53]. An-other one is a study that can handle any datasets without such restriction [48,40,35,47,1].  Our study is related tothe latter. VGAN [48] exploits 3D convolutional networks to generate videos. TGAN [40] first generates a set of latent vectors corresponding to each frame and then transforms them into actual images. MoCoGAN [47] produces videos more efficiently by decomposing the latent space into themotion and the content subspaces. Although these models illustrate that models using GAN are also effective in videogeneration, they have a problem of requiring a relatively large computational cost.   Acharyaet al. [1] proposed a method of generating high-resolution videos with Progres-siveGAN [23].
 
 ### RESULTS
 
