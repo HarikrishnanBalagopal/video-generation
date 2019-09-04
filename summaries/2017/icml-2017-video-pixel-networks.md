@@ -25,8 +25,7 @@
 
 ![architecture-1.png](images/icml-2017-video-pixel-networks/architecture-1.png "Architecture")
 
-Figure 1. Dependency map (top) and neural network structure (bottom) for the VPN (left) and the baseline model (right). F^t denotes
-the estimated distribution over frame Ft, from which Ft is sampled. Dashed lines denote masked convolutional layers.
+Figure 1. Dependency map (top) and neural network structure (bottom) for the VPN (left) and the baseline model (right). $\hat{F}_t$ denotes the estimated distribution over frame $F_t$, from which $F_t$ is sampled. Dashed lines denote masked convolutional layers.
 
 Probabilistic Model:
 Below we define the probabilistic model implemented by Video Pixel Networks. Let a video x be a four dimensional tensor of pixel values $x_{t, i, j, c}$, where the first
