@@ -19,44 +19,46 @@
 
 ### APPLICATIONS SUMMARY
 
+- Conditional video generation
+
 ### ARCHITECTURE SUMMARY
 
-![architecture.png](images/2018-everybody-dance-now/architecture-1.png "Architecture")
+![architecture-1.png](images/2018-everybody-dance-now/architecture-1.png "Architecture")
+
+Fig.2.  Correspondence between pose stick figure and target person frame.
+
+![architecture-2.png](images/2018-everybody-dance-now/architecture-2.png "Architecture")
+
+Fig.3. (Top)Training: Our model uses a pose detectorPto create pose stick figures from video frames of the target subject. During training we learn the mapping $G$ along side an adversarial discriminator $D$ which attempts to distinguish between the “real” correspondence pair $(x,y)$ and the “fake” pair $(G(x),y)$. (Bottom)Transfer: We use a pose detector $P: Y′ \to X′$ to obtain pose joints for the source person that are transformed by our normalization process $Norm$ into joints for the target person for which pose stick figures are created. Then we apply the trained mapping $G$.
+
+![architecture-3.png](images/2018-everybody-dance-now/architecture-3.png "Architecture")
+
+Fig.4. Temporal smoothing setup. When synthesizing the current frame $G(x_t)$, we condition on its corresponding pose stick figurextand thepreviously synthesized frame $G(x_{t−1})$ to obtain temporally smooth outputs. Discriminator $D$ then attempts to differentiate the “real” temporally coherent sequence $(x_{t−1}, x_t, y_{t−1}, y_t)$ from the “fake” sequence $(x_{t−1}, x_t, G(x_{t−1}), G(x_t))$.
+
+![architecture-4.png](images/2018-everybody-dance-now/architecture-4.png "Architecture")
+
+Fig.5. Face GAN setup. Residual is predicted by generator $G_f$ and added to the original face prediction from the main generator.
 
 The pose stick figure images are obtained using an off the shelf pose detector (OpenPose) for all videos in the dataset. The generator is given the pose image and asked to synthesize the corresponding frame in the video. The discriminator looks at both (fake frame, real pose) pairs and (real frame, real pose) pairs and learns to tell the difference.
 
 During testing the source frame is passed through the pose detector to get the pose image for that person. It is normalized to the pose for the target person in the training set. This normalized pose is given to the generator to create the corresponding frame in the output video.
 
-![architecture.png](images/2018-everybody-dance-now/architecture-2.png "Architecture")
-
 To maintain temporal coherence we feed in 2 consecutive (frame, pose) pairs at a time to the discriminator.
-
-![architecture.png](images/2018-everybody-dance-now/architecture-3.png "Architecture")
 
 In order to get more realistic detailed faces, a separate GAN is learned to generate faces. The generator for this GAN looks at the (fake frame, real pose) pair and generates a residual that is added to the fake frame to produce the final frame.
 
 In addition to the adversarial loss a perceptual reconstruction loss which compares pretrained VGGNet features at different layers of the network is added to better.
 
-We adapt architectures from various models for different stages of
-our pipeline. To extract pose keypoints for the body, face, and hands
-we use architectures provided by a state of the art pose detector
-OpenPose [5, 27, 35].
-For the image translation stage of our pipeline, we adapt the architectures
-proposed by Wang et al. in the pix2pixHD model [33].
-To create 128x128 face image residuals, we do not need the full capability
-of the entire pix2pixHD generator and therefore we predict
-face residuals using the global generator of pix2pixHD. Similarly,
-we use a single 70x70 Patch-GAN discriminator [14] for the face
-discriminator. In practice we use the LSGAN [24] objective during
-training similarly to pix2pixHD for both the full image and face
-GANs.
+We adapt architectures from various models for different stages of our pipeline. To extract pose keypoints for the body, face, and hands we use architectures provided by a state of the art pose detector OpenPose [5, 27, 35]. For the image translation stage of our pipeline, we adapt the architectures proposed by Wang et al. in the pix2pixHD model [33]. To create 128x128 face image residuals, we do not need the full capability of the entire pix2pixHD generator and therefore we predict face residuals using the global generator of pix2pixHD. Similarly, we use a single 70x70 Patch-GAN discriminator [14] for the face discriminator. In practice we use the LSGAN [24] objective during training similarly to pix2pixHD for both the full image and face GANs.
 
 ### AUTHORS
 
-- CAROLINE CHAN, UC Berkeley
-- SHIRY GINOSAR, UC Berkeley
-- TINGHUI ZHOU, UC Berkeley
-- ALEXEI A. EFROS, UC Berkeley
+UC Berkeley
+
+- Caroline Chan
+- Shiry Ginosar
+- Tinghui Zhou
+- Alexei A. Efros
 
 ### COMPARED TO
 
@@ -64,35 +66,14 @@ GANs.
 
 ### CONTRIBUTIONS
 
-- Our main contributions are a learning-based
-pipeline for human motion transfer between videos, and the quality
-of our results which demonstrate complex motion transfer in realistic
-and detailed videos.
+- Our main contributions are a learning-based pipeline for human motion transfer between videos, and the quality of our results which demonstrate complex motion transfer in realistic and detailed videos.
 
-- We also conduct an ablation study on the
-components of our model comparing to a baseline framework.
+- We also conduct an ablation study on the components of our model comparing to a baseline framework.
 
 ### DATASETS
 
 - Authors created their own dataset:
-We collect source and target videos in slightly different manners.
-To learn the appearance of the target subject in many poses, it is
-important that the target video captures a sufficient range of motion
-and sharp frames with minimal blur. To ensure the quality of the
-frames, we filmed our target subject for around 20 minutes of real
-time footage at 120 frames per second which is possible with some
-modern cell phone cameras. Since our pose representation does not
-encode information about clothes, we had our target subjects wear
-tight clothing with minimal wrinkling.
-In contrast to some of the preparation required for filming a
-target subject, source videos do not require the same (albeit still
-reasonable) quality as we only need decent pose detections from the
-source video. Without such limitations, many high quality videos
-of a subject performing a dance are abundant online.
-We found pre-smoothing pose keypoints to be immensely helpful
-in reducing jittering in our outputs. For videos with a high framerate
-(120 fps), we gaussian smooth the keypoints over time, and we use
-median smoothing for videos with lower framerates.
+We collect source and target videos in slightly different manners. To learn the appearance of the target subject in many poses, it is important that the target video captures a sufficient range of motion and sharp frames with minimal blur. To ensure the quality of the frames, we filmed our target subject for around 20 minutes of real time footage at 120 frames per second which is possible with some modern cell phone cameras. Since our pose representation does not encode information about clothes, we had our target subjects wear tight clothing with minimal wrinkling. In contrast to some of the preparation required for filming a target subject, source videos do not require the same (albeit still reasonable) quality as we only need decent pose detections from the source video. Without such limitations, many high quality videos of a subject performing a dance are abundant online. We found pre-smoothing pose keypoints to be immensely helpful in reducing jittering in our outputs. For videos with a high framerate (120 fps), we gaussian smooth the keypoints over time, and we use median smoothing for videos with lower framerates.
 
 ### IMPLEMENTATION
 
@@ -197,7 +178,11 @@ Over the past few years there have been several frameworks, which often (but not
 
 ![results-1.png](images/2018-everybody-dance-now/results-1.png "Results 1")
 
+Fig. 1.  Motion transfer from a source onto two target subjects.
+
 ![results-2.png](images/2018-everybody-dance-now/results-2.png "Results 2")
 
 Fig. 6. Transfer results. In each section we show five consecutive frames. The top row shows the source subject, the middle row shows the normalized pose
 stick figures, and the bottom row shows the model outputs of the target person.
+
+![results-3.png](images/2018-everybody-dance-now/results-3.png "Results 3")
