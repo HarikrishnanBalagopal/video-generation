@@ -25,6 +25,14 @@
 
 ### ARCHITECTURE SUMMARY
 
+![architecture-1.png](images/nips-2018-video-to-video-synthesis/architecture-1.png "Architecture")
+
+Figure 8:  The network architecture ($G_1$) for low-res videos.  Our network takes in a number of semantic label maps and previously generated images, and outputs the intermediate frame as well as the flow map and the mask.
+
+![architecture-2.png](images/nips-2018-video-to-video-synthesis/architecture-2.png "Architecture")
+
+Figure 9: The network architecture ($G_2$) for higher resolution videos. The label maps and previousframes are downsampled and fed into the low-res network $G_1$. Then, the features from the high-res network and the last layer of the low-res network are summed and fed into another series of residual blocks to output the final images.
+
 $$F(\tilde{x}^{t−1}_{t−L}, s^t_{t−L}) = (1 − \tilde{m}_t) \odot \tilde{w}_{t−1}(\tilde{x}_{t−1}) + \tilde{m}_t \odot \tilde{h}_t$$
 The first part corresponds to pixels warped from the previous frame, while the second part hallucinates new pixels.
 
@@ -70,13 +78,13 @@ We use the multi-scale PatchGAN discricontributionsminator architecture [33, 73]
 
 NVIDIA and MIT CSAIL
 
-- Ting-Chun Wang1 <mailto:tingchunw@nvidia.com>
-- Ming-Yu Liu1 <mailto:mingyul@nvidia.com>
-- Jun-Yan Zhu2 <mailto:junyanz@mit.edu>
-- Guilin Liu1 <mailto:guilinl@nvidia.com>
-- Andrew Tao1 <mailto:atao@nvidia.com>
-- Jan Kautz1 <mailto:jkautz@nvidia.com>
-- Bryan Catanzaro1 <mailto:bcatanzaro@nvidia.com>
+- Ting-Chun Wang1 [tingchunw@nvidia.com](mailto:tingchunw@nvidia.com)
+- Ming-Yu Liu1 [mingyul@nvidia.com](mailto:mingyul@nvidia.com)
+- Jun-Yan Zhu2 [junyanz@mit.edu](mailto:junyanz@mit.edu)
+- Guilin Liu1 [guilinl@nvidia.com](mailto:guilinl@nvidia.com)
+- Andrew Tao1 [atao@nvidia.com](mailto:atao@nvidia.com)
+- Jan Kautz1 [jkautz@nvidia.com](mailto:jkautz@nvidia.com)
+- Bryan Catanzaro1 [bcatanzaro@nvidia.com](mailto:bcatanzaro@nvidia.com)
 
 ### COMPARED TO
 
@@ -125,6 +133,18 @@ this CNN. We then compute the mean $\tilde{\mu}$ and covariance matrix $\tilde{\
 
 Figure 1: Generating a photorealistic video from an input segmentation map video on Cityscapes. Top left: input. Top right: pix2pixHD. Bottom left: COVST. Bottom right: vid2vid (ours).
 
+![qualitative-1.gif](images/nips-2018-video-to-video-synthesis/qualitative-1.gif "Apolloscape comparison with pix2pixHD and COVST.")
+
+Figure 2:  Apolloscape results.   Left:pix2pixHD. Center: COVST. Right:  proposed.   The inputsemantic segmentation mask video is shown in the left video.
+
+![qualitative-2.gif](images/nips-2018-video-to-video-synthesis/qualitative-2.gif "Cityscapes road surface change.")
+
+Figure 3: Example multi-modal video synthesis results. These synthesized videos contain different road surfaces.
+
+![qualitative-3.gif](images/nips-2018-video-to-video-synthesis/qualitative-3.gif "Cityscapes semantic label change.")
+
+Figure 4: Example results of changing input semantic segmentation masks to generate diverse videos.Left: tree $\to$ building. Right: building $\to$ tree. The original video is shown in Figure 3.
+
 ![qualitative-cityscapes-future-prediction.gif](images/nips-2018-video-to-video-synthesis/qualitative-cityscapes-future-prediction.gif "Cityscapes future prediction comparison")
 
 Figure 7: Future video prediction results. Top left: ground truth. Top right: PredNet [45]. Bottom left: MCNet [68]. Bottom right: ours.
@@ -172,6 +192,22 @@ Table 3: Comparison between future video prediction methods on Cityscapes.
 |--------------------------|-----------------------:|
 | vid2vid (ours) / PredNet | **0.92** / 0.08        |
 | vid2vid (ours) / MCNet   | **0.98** / 0.02        |
+
+Evaluation for the Apolloscape Dataset:
+We provide both the FID and the human preference score on the Apolloscape dataset.  For bothmetrics, our method outperforms the other baselines.
+
+Table 4: Comparison between competing video-to-video synthesis approaches on Apolloscape.
+
+| Inception Net. of FID | I3D  | ResNeXt |
+|-----------------------|-----:|--------:|
+| pix2pixHD             | 2.33 | 0.128   |
+| COVST                 | 2.36 | 0.128   |
+| vid2vid(ours)         | **2.24** | **0.125** |
+
+| Human Preference Score     |                   |
+|----------------------------|------------------:|
+| vid2vid(ours)   /pix2pixHD | **0.61** / 0.39   |
+| vid2vid(ours)   /COVST     | **0.59** / 0.4114 |
 
 ### RELATED WORK
 
