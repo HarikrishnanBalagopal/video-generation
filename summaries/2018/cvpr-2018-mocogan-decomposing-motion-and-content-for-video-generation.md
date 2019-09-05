@@ -19,16 +19,50 @@
 
 ### APPLICATIONS SUMMARY
 
-- Image-to-video translation
+- Unconditional video generation
 - Categorical Video Generation
+- Image-to-video translation
 
 ### ARCHITECTURE SUMMARY
+
+![architecture-2.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/architecture-2.png "Architecture")
+
+Figure 1: MoCoGAN adopts a motion and content decomposed representation for video generation. It uses an image latent space (each latent code represents an image) and divides the latent space into content and motion subspaces. By sampling a point in the content subspace and sampling different  trajectories  in  the  motion  subspace,  it  generates videos of the same object performing different motion.  By sampling different points in the content subspace and the same motion trajectory in the motion subspace, it generates videos of different objects performing the same motion.
 
 ![architecture-1.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/architecture-1.png "Architecture")
 
 Figure 2: The MoCoGAN framework for video generation. For a video, the content vector, $z_C$, is sampled once and fixed. Then, a series of random variables [$\epsilon^{(1)}$, ..., $\epsilon^{(K)}$] are sampled and mapped to a series of motion codes [$z_M^{(1)}$, ..., $z_M^{(K)}$] via the recurrent neural network $R_M$. A generator $G_I$ produces a frame, $\tilde{x}^{(k)}$  , using the content and the motion vectors {$z_C$, $z_M^{(k)}$}. The discriminators, $D_I$ and $D_V$, are trained on real and fake images and videos, respectively, sampled from the training set $v$ and the generated set $\tilde{v}$. The function $S_1$ samples a single frame from a video, $S_T$ samples T consequtive frames.
 
-![architecture-2.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/architecture-2.png "Architecture")
+Network Architecture:
+
+Table 6: Network architectures of the image generative network $G_I$, the image discriminative network $D_I$, and the video generative network $D_V$ used in the experiments.
+
+| $G_I$ | Configuration                           |
+|-------|----------------------------------------:|
+| Input | $[z_a \sim N(0, I), z_m \sim R_M]$      |
+| 0     | DCONV-(N512, K6, S0, P0), BN, LeakyReLU |
+| 1     | DCONV-(N256, K4, S2, P1), BN, LeakyReLU |
+| 2     | DCONV-(N128, K4, S2, P1), BN, LeakyReLU |
+| 3     | DCONV-(N64, K4, S2, P1), BN, LeakyReLU  |
+| 4     | DCONV-(N3, K4, S2, P1), BN, LeakyReLU   |
+
+| $D_I$ | Configuration                           |
+|-------|----------------------------------------:|
+| Input | height x width x 3                      |
+| 0     | CONV-(N64, K4, S2, P1), BN, LeakyReLU   |
+| 1     | CONV-(N128, K4, S2, P1), BN, LeakyReLU  |
+| 2     | CONV-(N256, K4, S2, P1), BN, LeakyReLU  |
+| 3     | CONV-(N1, K4, S2, P1), Sigmoid          |
+
+| $D_V$ | Configuration                            |
+|-------|-----------------------------------------:|
+| Input | 16 x height x width x 3                  |
+| 0     | CONV3D-(N64, K4, S1, P0), BN, LeakyReLU  |
+| 1     | CONV3D-(N128, K4, S1, P0), BN, LeakyReLU |
+| 2     | CONV3D-(N256, K4, S1, P0), BN, LeakyReLU |
+| 3     | CONV3D-(N1, K4, S1, P0), Sigmoid         |
+
+Table.6. Detailed network architecture used in the main paper. We used several different type of layers. A convolutional layer with N output channels, kernel size K, stride S, and padding P is denoted in the table as CONV-(N, K, S, P) and similarly for 3D convolutional layers CONV3D-(N, K, S, P). Kernel size, padding, and stride are equal for all the dimensions in each layer. Batch normalization layers are followed by the LeakyReLU nonlinearity in our case. The $R_M$ consisted of a single GRU module.
 
 ### AUTHORS
 
@@ -43,6 +77,7 @@ NVIDIA and Snap Research
 
 - [VGAN](https://papers.nips.cc/paper/6194-generating-videos-with-scene-dynamics) for unconditional video generation
 - [TGAN](https://arxiv.org/abs/1611.06624) for unconditional video generation
+- [MCNET](https://arxiv.org/abs/1706.08033) Motion Content Network for video sequence prediction used in comparison image to video translation task
 
 ### CONTRIBUTIONS
 
@@ -72,8 +107,7 @@ scaled the videos to 96 x 96. Due to the small size, we did not conduct a quanti
 
 ### METRICS
 
-- **Average Content Distance (ACD)** metric: For quantitative comparison, we measured content consistency of a generated video using the Average Content
-Distance (ACD) metric.
+- **Average Content Distance (ACD)** metric: For quantitative comparison, we measured content consistency of a generated video using the Average Content Distance (ACD) metric.
   - For shape motion, we first computed the average color of the generated shape in each frame. Each frame was then represented by a 3-dimensional vector. The ACD is then given by the average pairwise L2 distance of the per-frame average color vectors.
   - For facial expression videos, we employed OpenFace [2], which outperforms human performance in the face recognition task, for measuring video content consistency. OpenFace produced a feature vector for each frame in a face video. The ACD was then computed using the average pairwise L2 distance of the per-frame feature vectors.
 
@@ -81,8 +115,7 @@ Distance (ACD) metric.
 
 - **Inception score**
 
-- **Motion control score (MCS)**: To evaluate the capability in motion generation control. To compute MCS, we first trained a spatio-temporal CNN classifier for
-action recognition using the labeled training dataset. During test time, we used the classifier to verify whether the generated video contained the action. The MCS is then given by testing accuracy of the classifier. A model with larger MCS offers better control over the action category.
+- **Motion control score (MCS)**: To evaluate the capability in motion generation control. To compute MCS, we first trained a spatio-temporal CNN classifier for action recognition using the labeled training dataset. During test time, we used the classifier to verify whether the generated video contained the action. The MCS is then given by testing accuracy of the classifier. A model with larger MCS offers better control over the action category.
 
 ### QUALITATIVE EVALUATION SUMMARY
 
@@ -94,7 +127,19 @@ Figure 3: Generated video clips used in the user study. The video clips were ran
 
 ![qualitative-interpolation.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/qualitative-interpolation.png "Qualitative comparison on faces and taichi.")
 
-Fig. 5 shows two videos from the best model in the ablation study results in Table 4.
+Figure 5: Generated videos of changing facial expressions. We changed the expression from smile to fear through surprise. These two videos are from the best model in the ablation study results in Table 4.
+
+![results-faces-1.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/results-faces-1.png "Result of varying content and motion vectors in faces dataset.")
+
+![results-faces-2.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/results-faces-2.png "Result of varying content and motion vectors in faces dataset.")
+
+Figure 7: Facial expression video generation results. Every three rows have the same identity but different $z_A$.
+
+![results-actions-1.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/results-actions-1.png "Result of varying content and motion vectors in actions dataset.")
+
+![results-actions-2.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/results-actions-2.png "Result of varying content and motion vectors in actions dataset.")
+
+Figure 8: Human action video generation results. Every three rows have the same identity but different $z_A$.
 
 ### QUANTITATIVE EVALUATION SUMMARY
 
@@ -132,8 +177,7 @@ Table 3: User preference score on video generation quality.
 | MoCoGAN / VGAN     | **84.2** / 15.8 | **75.4** / 24.6 |
 | MoCoGAN / TGAN     | **54.7** / 45.3 | **68.0** / 32.0 |
 
-Table 4: Performance on categorical facial expression video
-generation with various MoCoGAN settings.
+Table 4: Performance on categorical facial expression video generation with various MoCoGAN settings.
 
 | Settings                   | MCS       | ACD       |
 |----------------------------|----------:|-----------|
@@ -142,7 +186,16 @@ generation with various MoCoGAN settings.
 | $D_I$ $zA \to G_I$         | 0.355     | 0.738     |
 | $D_I$ $zA \to R_M$         | **0.581** | **0.606** |
 
+Table 5: User preference score on the quality of the image-to-video-translation results.
+
+| User preference, % | Tai-Chi         |
+|--------------------|----------------:|
+| MoCoGAN / C-VGAN   | **66.9** / 33.1 |
+| MoCoGAN / MCNET    | **65.6** / 34.4 |
+
 Ablation study: We also evaluated the impact of different conditioning schemes to the categorical video generation performance. The first scheme is our default scheme where $zA \to R_M$. The second scheme, termed $z_A \to G_I$, was to feed the category variable directly to the image generator. In addition, to show the impact of the image discriminative network $D_I$, we considered training the MoCoGAN framework without $D_I$. Table 4 shows experimental results. We find that the models trained with $D_I$ consistently yield better performances on various metrics. We also find that $z_A \to R_M$ yields better performance.
+
+![quantitative-1.png](images/cvpr-2018-mocogan-decomposing-motion-and-content-for-video-generation/quantitative-1.png "Comparison of MCS and ACD on various settings of hyperparameters.")
 
 ### RELATED WORK
 
